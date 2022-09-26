@@ -3,26 +3,27 @@ import os
 
 import aws_cdk as cdk
 
-from escultoide_bot.escultoide_bot_stack import EscultoideBotStack
+from backend.component import EscultoideBot
 
+# Secret names
+TG_SECRET = "dev/EscultoideBot/TelegramAPIKey"
+NOTION_SECRET = "prod/EscultoideBot/NotionAPIKey"
+
+# ID for the Notion calendar database to access
+NOTION_CALENDAR = "7e491de1361b4f7da91dff3d607b6480"
 
 app = cdk.App()
-EscultoideBotStack(app, "EscultoideBotStack",
-    # If you don't specify 'env', this stack will be environment-agnostic.
-    # Account/Region-dependent features and context lookups will not work,
-    # but a single synthesized template can be deployed anywhere.
 
-    # Uncomment the next line to specialize this stack for the AWS Account
-    # and Region that are implied by the current CLI configuration.
-
-    #env=cdk.Environment(account=os.getenv('CDK_DEFAULT_ACCOUNT'), region=os.getenv('CDK_DEFAULT_REGION')),
-
-    # Uncomment the next line if you know exactly what Account and Region you
-    # want to deploy the stack to. */
-
-    #env=cdk.Environment(account='123456789012', region='us-east-1'),
-
-    # For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html
-    )
+EscultoideBot(
+    app,
+    construct_id="EscultoideBot",
+    telegram_secret_name=TG_SECRET,
+    notion_secret_name=NOTION_SECRET,
+    notion_calendar_id=NOTION_CALENDAR,
+    env=cdk.Environment(
+        account=os.getenv("CDK_DEFAULT_ACCOUNT"), region=os.getenv("CDK_DEFAULT_REGION")
+    ),
+    allowed_users=["dieortin", "alon2o"],
+)
 
 app.synth()
