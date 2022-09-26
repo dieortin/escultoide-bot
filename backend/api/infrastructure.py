@@ -37,6 +37,7 @@ class API(Construct):
         self.bot_lambda = lambda_python_alpha.PythonFunction(
             self,
             "BotLambda",
+            description="Main function processing Telegram updates",
             runtime=_lambda.Runtime.PYTHON_3_9,
             entry=str(pathlib.Path(__file__).parent.joinpath("runtime").resolve()),
             index="router_lambda.py",
@@ -87,7 +88,8 @@ class API(Construct):
             proxy=False,
             policy=only_telegram_ip_policy,
             deploy_options=apigw.StageOptions(
-                metrics_enabled=True, logging_level=apigw.MethodLoggingLevel.ERROR,
+                metrics_enabled=True,
+                logging_level=apigw.MethodLoggingLevel.ERROR,
             ),
         )
 
@@ -101,5 +103,5 @@ class API(Construct):
                 proxy=False,
                 integration_responses=[{"statusCode": "200"}],
             ),
-            method_responses=[apigw.MethodResponse(status_code="200")]
+            method_responses=[apigw.MethodResponse(status_code="200")],
         )
