@@ -86,6 +86,9 @@ class API(Construct):
             handler=self.bot_lambda,
             proxy=False,
             policy=only_telegram_ip_policy,
+            deploy_options=apigw.StageOptions(
+                metrics_enabled=True, logging_level=apigw.MethodLoggingLevel.ERROR,
+            ),
         )
 
         self.gateway.root.add_method(
@@ -98,4 +101,5 @@ class API(Construct):
                 proxy=False,
                 integration_responses=[{"statusCode": "200"}],
             ),
+            method_responses=[apigw.MethodResponse(status_code="200")]
         )
