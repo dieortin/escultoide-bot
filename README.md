@@ -1,5 +1,7 @@
 # EscultoideBot
 
+> :warning: Project in progress
+
 ## Introduction
 
 This project implements a [Telegram](https://telegram.org/) bot, which interacts 
