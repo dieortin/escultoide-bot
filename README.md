@@ -1,58 +1,79 @@
+# EscultoideBot
 
-# Welcome to your CDK Python project!
+## Introduction
 
-This is a blank project for CDK development with Python.
+This project implements a [Telegram](https://telegram.org/) bot, which interacts 
+with a [Notion](https://notion.so) database through its 
+[API](https://developers.notion.com/reference) to provide certain information to users.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+The bot is implemented with a serverless architecture, leveraging 
+[AWS](https://aws.amazon.com/) services.
+Instead of having a long-running process poll the Telegram servers for updates, 
+EscultoideBot configures a webhook and then processes the Telegram events on
+arrival through [Lambda functions](https://aws.amazon.com/lambda/). This allows 
+for seamless scaling from zero 
+requests to a massive scale, without incurring in costs when the bot is not
+being used.
 
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
+This repository contains both the runtime code for the Lambda functions
+themselves, and the CDK code that defines the infrastructure they run on.
 
-To manually create a virtualenv on MacOS and Linux:
+## Running the bot
 
+CDK deals with provisioning the infrastructure and deploying the runtime code,
+so only a few steps must be taken to run this project.
+
+### Prerequisites
+
+* AWS account that has been [bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html)
+* Workstation configured with your AWS credentials and region
+
+### Steps
+
+1. Clone or download the project folder, and change to its directory:
 ```
-$ python3 -m venv .venv
+$ git clone https://github.com/dieortin/escultoide-bot
+$ cd escultoide-bot
 ```
 
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
-
-```
-$ source .venv/bin/activate
-```
-
-If you are a Windows platform, you would activate the virtualenv like this:
-
-```
-% .venv\Scripts\activate.bat
-```
-
-Once the virtualenv is activated, you can install the required dependencies.
-
+2. Install the required packages:
 ```
 $ pip install -r requirements.txt
 ```
 
-At this point you can now synthesize the CloudFormation template for this code.
+3. Create two secrets in [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/),
+with the API keys to be used for Telegram and Notion.
 
+4. Modify the configuration values in `app.py` to match the names for 
+your secrets in AWS Secrets Manager, and the ID of your Notion database.
+
+5. Deploy the application:
 ```
-$ cdk synth
+$ cdk deploy
 ```
 
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
+## Architecture
 
-## Useful commands
+The project's backend consists on two main components:
 
- * `cdk ls`          list all stacks in the app
- * `cdk synth`       emits the synthesized CloudFormation template
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk docs`        open CDK documentation
+### API
 
-Enjoy!
+This construct receives and processes updates from Telegram. It consists
+on two components:
+
+* A Lambda function that processes new Telegram updates
+* An API Gateway, which receives HTTP requests from Telegram, invokes
+the Lambda and responds
+
+### Webhook
+
+This construct manages the Telegram API configuration so that 
+updates are sent to the API.
+
+It consists on a custom resource that represents the configured
+webhook for the bot in the Telegram API. It manages setting the webhook
+to the URL of the API so that it can receive updates, and removing it
+when the component is deleted.
+
+This custom resource has a Lambda function that performs the required 
+actions when lifecycle changes are made to it.
