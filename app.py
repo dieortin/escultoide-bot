@@ -6,7 +6,7 @@ import aws_cdk as cdk
 from backend.component import EscultoideBot
 
 # Secret names
-TG_SECRET = "dev/EscultoideBot/TelegramAPIKey"
+TG_SECRET = "prod/EscultoideBot/TelegramAPIKey"
 NOTION_SECRET = "prod/EscultoideBot/NotionAPIKey"
 
 # ID for the Notion calendar database to access
