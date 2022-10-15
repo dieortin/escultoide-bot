@@ -51,6 +51,11 @@ class API(Construct):
             log_retention=RetentionDays.ONE_WEEK,
         )
 
+        # Alarm when the lambda is getting more invocations than expected
+        self.bot_lambda.metric_all_invocations().create_alarm(
+            self, "HighUsage", threshold=20, evaluation_periods=4, datapoints_to_alarm=3
+        )
+
         # The bot lambda must be able to read both API Key secrets
         telegram_secret.grant_read(grantee=self.bot_lambda)
         notion_secret.grant_read(grantee=self.bot_lambda)
