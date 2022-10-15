@@ -7,7 +7,7 @@ from queue import Queue
 import boto3
 from telegram.ext import Dispatcher, CommandHandler
 from telegram import Update, Bot
-from notion_api import get_next_event, describe_event, describe_attending_scouters
+from notion.api import get_next_event
 
 ALLOWED_USERNAMES = set(os.environ["AllowedUsers"].split(","))
 TELEGRAM_SECRET_NAME = os.environ["TelegramSecretName"]
@@ -53,15 +53,26 @@ def echo_callback(update: Update, context):
 @authorized_users_only
 def proximo_callback(update: Update, context):
     next_event = get_next_event()
-    next_event_description = describe_event(next_event)
-    next_event_scouters = describe_attending_scouters(next_event)
-    response_message = (
-        f"El próximo evento de Escultas es:"
-        f"\n*{next_event_description}*"
-        f"\nScouters: _{next_event_scouters}_"
+
+    participants_str = (
+        f"\N{baby angel} <b>{next_event.participant_num}</b> educandos"
+        if next_event.participant_num > 0 else ""
     )
 
-    update.message.reply_markdown_v2(response_message)
+    scouters_str = f"\N{mage} <b>{len(next_event.scouters)}</b> scouters"
+    if next_event.scouters:
+        scouters_str += f": <i>{', '.join(next_event.scouters)}</i>"
+
+    response_message = (
+        f"\n<u><b>{next_event.title}</b></u>"
+        f"\n\N{stopwatch} {next_event.date}"
+        f"\n\N{pushpin} {next_event.location}"
+        f"\n{participants_str}"
+        f"\n{scouters_str}"
+        f"\n<a href='{next_event.url}'>Ver en Notion</a>"
+    )
+
+    update.message.reply_html(response_message, disable_web_page_preview=True)
     print(f"Sent response: <{response_message}>")
 
 
