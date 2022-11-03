@@ -135,9 +135,11 @@ class NotionEvent:
 
         date_begin = properties["Fecha"]["date"]["start"]
         date_end = properties["Fecha"]["date"]["end"]
-        date_range = DateRange(
-            datetime.fromisoformat(date_begin), datetime.fromisoformat(date_end)
-        )
+
+        date_begin_parsed = datetime.fromisoformat(date_begin)
+        date_end_parsed = datetime.fromisoformat(date_end) if date_end else None
+
+        date_range = DateRange(date_begin_parsed, date_end_parsed)
 
         event_type = properties["Tipo"]["select"]["name"]
 
