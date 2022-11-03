@@ -55,11 +55,11 @@ def proximo_callback(update: Update, context):
     next_event = get_next_event()
 
     participants_str = (
-        f"\N{baby angel} <b>{next_event.participant_num}</b> educandos"
+        f"\n\N{baby angel} <b>{next_event.participant_num}</b> educandos"
         if next_event.participant_num > 0 else ""
     )
 
-    scouters_str = f"\N{mage} <b>{len(next_event.scouters)}</b> scouters"
+    scouters_str = f"\n\N{mage} <b>{len(next_event.scouters)}</b> scouters"
     if next_event.scouters:
         scouters_str += f": <i>{', '.join(next_event.scouters)}</i>"
 
@@ -67,8 +67,8 @@ def proximo_callback(update: Update, context):
         f"\n<u><b>{next_event.title}</b></u>"
         f"\n\N{stopwatch} {next_event.date}"
         f"\n\N{pushpin} {next_event.location}"
-        f"\n{participants_str}"
-        f"\n{scouters_str}"
+        f"{participants_str}"
+        f"{scouters_str}"
         f"\n<a href='{next_event.url}'>Ver en Notion</a>"
     )
 
