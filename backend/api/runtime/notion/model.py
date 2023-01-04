@@ -3,7 +3,7 @@ Classes for the data stored in Notion
 """
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional
 import calendar
 import locale
 
@@ -15,7 +15,7 @@ locale.setlocale(locale.LC_ALL, "es_ES.UTF8")
 class DateRange:
     """Class representing a period of time between two dates, or a single date."""
 
-    def __init__(self, start: datetime, end: datetime):
+    def __init__(self, start: datetime, end: Optional[datetime]):
         """
         Initializes a new DateRange
         :param start: Date in which the range begins
@@ -49,9 +49,9 @@ class DateRange:
         :return: String with the month name
         """
         try:
-            return calendar.month_name[month - 1]
+            return calendar.month_name[month]
         except KeyError:
-            raise ValueError("Month must be 0 <= n < 13")
+            raise ValueError("Month must be 1 <= n < 13")
 
     def get_date_description(self, date: datetime):
         """
@@ -71,7 +71,7 @@ class DateRange:
         :return: String with the representation
         """
         if not self.end:
-            return self.get_date_description(self.start)
+            return f"El {self.get_date_description(self.start)}"
         return (
             f"Del {self.get_date_description(self.start)} "
             f"al {self.get_date_description(self.end)}"
@@ -131,7 +131,11 @@ class NotionEvent:
         properties = page["properties"]
 
         title = properties["Name"]["title"][0]["plain_text"]
-        location = properties["Lugar"]["rich_text"][0]["plain_text"]
+
+        try:
+            location = properties["Lugar"]["rich_text"][0]["plain_text"]
+        except IndexError:
+            location = ""
 
         date_begin = properties["Fecha"]["date"]["start"]
         date_end = properties["Fecha"]["date"]["end"]

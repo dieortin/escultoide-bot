@@ -59,7 +59,8 @@ def proximo_callback(update: Update, context):
         if next_event.participant_num > 0 else ""
     )
 
-    scouters_str = f"\n\N{mage} <b>{len(next_event.scouters)}</b> scouters"
+    scouters_word = "scouter" if len(next_event.scouters) == 1 else "scouters"
+    scouters_str = f"\n\N{mage} <b>{len(next_event.scouters)}</b> {scouters_word}"
     if next_event.scouters:
         scouters_str += f": <i>{', '.join(next_event.scouters)}</i>"
 
