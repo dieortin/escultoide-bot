@@ -10,7 +10,7 @@ TG_SECRET = "prod/EscultoideBot/TelegramAPIKey"
 NOTION_SECRET = "prod/EscultoideBot/NotionAPIKey"
 
 # ID for the Notion calendar database to access
-NOTION_CALENDAR = "7e491de1361b4f7da91dff3d607b6480"
+NOTION_CALENDAR = "dff753c361c949c6b4add593b9e4e0db"
 
 app = cdk.App()
 
@@ -23,7 +23,7 @@ EscultoideBot(
     env=cdk.Environment(
         account=os.getenv("CDK_DEFAULT_ACCOUNT"), region=os.getenv("CDK_DEFAULT_REGION")
     ),
-    allowed_users=["dieortin", "alon2o"],
+    allowed_users=["dieortin", "Alon2o", "Caloca", "madlmc"],
 )
 
 app.synth()
