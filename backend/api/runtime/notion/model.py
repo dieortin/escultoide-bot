@@ -3,7 +3,7 @@ Classes for the data stored in Notion
 """
 
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any, Optional, List
 import calendar
 import locale
 
@@ -100,7 +100,7 @@ class NotionEvent:
         date: DateRange,
         event_type: str,
         location: str,
-        scouters: [str],
+        scouters: List[str],
         participant_num: int,
         url: str,
     ):
