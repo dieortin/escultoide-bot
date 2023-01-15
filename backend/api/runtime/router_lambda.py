@@ -1,12 +1,12 @@
 import functools
 import json
 import os
-from typing import Callable, Any
-from queue import Queue
+import asyncio
+from typing import Callable, Any, Coroutine
 
 import boto3
-from telegram.ext import Dispatcher, CommandHandler
-from telegram import Update, Bot
+from telegram.ext import Application, CommandHandler
+from telegram import Update
 from notion.api import get_next_event
 
 ALLOWED_USERNAMES = set(os.environ["AllowedUsers"].split(","))
@@ -17,17 +17,16 @@ TELEGRAM_API_KEY = secrets_manager.get_secret_value(SecretId=TELEGRAM_SECRET_NAM
     "SecretString"
 ]
 
-bot = Bot(token=TELEGRAM_API_KEY)
-dispatcher = Dispatcher(bot, Queue(), use_context=True)
+application = Application.builder().token(TELEGRAM_API_KEY).build()
 
 
 def status_code(code: int) -> dict:
     return {"statusCode": code}
 
 
-def authorized_users_only(func: Callable[[Update, Any], None]):
+def authorized_users_only(func: Callable[[Update, Any], Coroutine[Any, Any, None]]):
     @functools.wraps(func)
-    def wrapper_authorized_users_only(update: Update, context: Any):
+    async def wrapper_authorized_users_only(update: Update, context: Any):
         message_username = update.message.from_user.username
 
         if message_username not in ALLOWED_USERNAMES:
@@ -36,22 +35,22 @@ def authorized_users_only(func: Callable[[Update, Any], None]):
                 f"{func.__name__}"
             )
             return status_code(401)
-        return func(update, context)
+        await func(update, context)
 
     return wrapper_authorized_users_only
 
 
-def echo_callback(update: Update, context):
+async def echo_callback(update: Update, context):
     chat_id = update.message.chat_id
     user = update.message.from_user
     text = update.message.text
 
     message = f"Received message from {user} in chat {chat_id}:" f"\n{text}"
-    update.message.reply_text(message)
+    await update.message.reply_text(message)
 
 
 @authorized_users_only
-def proximo_callback(update: Update, context):
+async def proximo_callback(update: Update, context):
     next_event = get_next_event()
 
     participants_str = (
@@ -73,33 +72,29 @@ def proximo_callback(update: Update, context):
         f"\n<a href='{next_event.url}'>Ver en Notion</a>"
     )
 
-    update.message.reply_html(response_message, disable_web_page_preview=True)
+    await update.message.reply_html(response_message, disable_web_page_preview=True)
     print(f"Sent response: <{response_message}>")
 
 
 # Add message and command handlers
-dispatcher.add_handler(CommandHandler("echo", echo_callback))
-dispatcher.add_handler(CommandHandler("proximo", proximo_callback))
+application.add_handler(CommandHandler("echo", echo_callback))
+application.add_handler(CommandHandler("proximo", proximo_callback))
 
-
-def handler(event, context):
-    print("Received new update from webhook")
-    update = Update.de_json(event, bot)
-    if not update:
-        print("Received event doesn't seem to be a valid Telegram update")
-        print(f"Event is: {json.dumps(event, indent=2)}")
-        return status_code(400)
-
+async def handle_update(update: Update):
     if update.message:
         print(
             f"Received message from {update.message.from_user}:"
             f"\n{update.message.text}"
         )
+    async with application:
+        await application.process_update(update)
 
-    try:
-        dispatcher.process_update(update)
-    except Exception as e:
-        print(f"Exception happened while processing update: {e}")
-        return status_code(500)
 
+def handler(event, context):
+    print("Received new update from webhook")
+    update = Update.de_json(event, application.bot)
+    if not update:
+        raise ValueError(f"Received event is not a valid Telegram update, event is {json.dumps(event, indent=2)}")
+    
+    asyncio.run(handle_update(update))
     return status_code(200)
