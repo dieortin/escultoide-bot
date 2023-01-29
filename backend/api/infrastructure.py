@@ -6,6 +6,8 @@ from aws_cdk import (
     aws_apigateway as apigw,
     aws_secretsmanager as ssm,
     aws_iam as iam,
+    aws_cloudwatch_actions as cw_actions,
+    aws_sns as sns,
 )
 from aws_cdk.aws_logs import RetentionDays
 from constructs import Construct
@@ -53,9 +55,17 @@ class API(Construct):
 
         # Alarm when the lambda is getting more invocations than expected
         self.bot_lambda.metric_all_invocations().create_alarm(
-            self, "HighUsage", threshold=20, evaluation_periods=4, datapoints_to_alarm=3
+            self, "HighUsageAlarm", threshold=20, evaluation_periods=4, datapoints_to_alarm=3
         )
 
+        # Alarm whenever an error occurs
+        failure_alarm = self.bot_lambda.metric_errors().create_alarm(
+            self, "FailureAlarm", threshold=1, evaluation_periods=1
+        )
+        # Create a SNS topic for failures, and post to it whenever failure occurs
+        failure_topic = sns.Topic(self, "FailureTopic")
+        failure_alarm.add_alarm_action(cw_actions.SnsAction(failure_topic))
+       
         # The bot lambda must be able to read both API Key secrets
         telegram_secret.grant_read(grantee=self.bot_lambda)
         notion_secret.grant_read(grantee=self.bot_lambda)
