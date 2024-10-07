@@ -41,7 +41,7 @@ def on_create(secret: str, api_key: str, api_gateway_url: str):
     :param api_key: Telegram API key to use
     :param api_gateway_url: URL where the Telegram updates must be sent
     """
-    print(f"Create webhook for url {api_gateway_url} " f"with API key <{secret}>")
+    print(f"Create webhook for url {api_gateway_url}")
     set_webhook(api_key, api_gateway_url)
 
 
@@ -52,7 +52,7 @@ def on_update(secret: str, api_key: str, api_gateway_url: str):
     :param api_key: Telegram API key to use
     :param api_gateway_url: URL where the Telegram updates must be sent
     """
-    print(f"Update webhook for url {api_gateway_url} " f"with API key <{secret}>")
+    print(f"Update webhook for url {api_gateway_url}")
     set_webhook(api_key, api_gateway_url)
 
 
@@ -63,7 +63,7 @@ def on_delete(secret: str, api_key: str, api_gateway_url: str):
     :param api_key: Telegram API key to use
     :param api_gateway_url: URL of the existing Webhook gateway
     """
-    print(f"Remove webhook for url {api_gateway_url} " f"with API key <{secret}>")
+    print(f"Remove webhook for url {api_gateway_url}")
     clear_webhook(api_key)
 
 
