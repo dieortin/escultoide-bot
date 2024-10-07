@@ -40,7 +40,7 @@ class API(Construct):
             self,
             "BotLambda",
             description="Main function processing Telegram updates",
-            runtime=_lambda.Runtime.PYTHON_3_9,
+            runtime=_lambda.Runtime.PYTHON_3_11,
             entry=str(pathlib.Path(__file__).parent.joinpath("runtime").resolve()),
             index="router_lambda.py",
             handler="handler",
@@ -62,7 +62,7 @@ class API(Construct):
         failure_alarm = self.bot_lambda.metric_errors().create_alarm(
             self, "FailureAlarm", threshold=1, evaluation_periods=1
         )
-        # Create a SNS topic for failures, and post to it whenever failure occurs
+        # Create an SNS topic for failures, and post to it whenever failure occurs
         failure_topic = sns.Topic(self, "FailureTopic")
         failure_alarm.add_alarm_action(cw_actions.SnsAction(failure_topic))
        

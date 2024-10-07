@@ -23,7 +23,7 @@ EscultoideBot(
     env=cdk.Environment(
         account=os.getenv("CDK_DEFAULT_ACCOUNT"), region=os.getenv("CDK_DEFAULT_REGION")
     ),
-    allowed_users=["dieortin", "Alon2o", "Caloca", "madlmc"],
+    allowed_users=["dieortin", "Alon2o"],
 )
 
 app.synth()

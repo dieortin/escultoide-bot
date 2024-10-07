@@ -30,7 +30,7 @@ class TelegramWebhook(Construct):
             "Lambda",
             description="Processes resource lifecycle events and manages the Telegram "
                         "webhook through the Telegram API",
-            runtime=_lambda.Runtime.PYTHON_3_9,
+            runtime=_lambda.Runtime.PYTHON_3_11,
             entry=str(pathlib.Path(__file__).parent.joinpath("runtime").resolve()),
             index="webhook_lambda.py",
             handler="on_event",

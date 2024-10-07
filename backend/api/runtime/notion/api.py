@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any
 
 import boto3
@@ -62,4 +62,4 @@ def get_next_event() -> NotionEvent:
     Return the first Notion event with a date after the current one
     :return: NotionEvent object
     """
-    return get_next_event_after(datetime.utcnow())
+    return get_next_event_after(datetime.now(UTC))
